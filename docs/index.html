@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>gameability</title>
+<meta name="description" content="Find the problems in a code benchmark that accept broken solutions. 17.9% of MBPP problems accept a broken solution; 95% of those are confirmed wrong on valid inputs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column; the hero is the number; each example is a test report (problem, visible test, the one-line change, the catching test). */
+:root {
+  --paper: #fafaf8;
+  --ink: #161a1f;
+  --muted: #59626e;
+  --rule: #dcdfe3;
+  --panel: #eff1f3;
+  --accent: #0f5c4d;
+  --del: #9b2226; --del-bg: #fbe7e6;
+  --add: #1f6b3a; --add-bg: #e3f2e7;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121518; --ink: #e6e8eb; --muted: #9ba4af; --rule: #2a2f36; --panel: #1a1e23;
+    --accent: #6fcfb6; --del: #f4a3a0; --del-bg: #3a1d1e; --add: #8fd9a8; --add-bg: #17301f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121518; --ink: #e6e8eb; --muted: #9ba4af; --rule: #2a2f36; --panel: #1a1e23;
+  --accent: #6fcfb6; --del: #f4a3a0; --del-bg: #3a1d1e; --add: #8fd9a8; --add-bg: #17301f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 52rem; margin: 0 auto; padding-inline: 1rem; padding-block: 3.5rem 4rem; display: flex; flex-direction: column; gap: 3.5rem; }
+.name { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); font-weight: 500; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.2rem, 7vw, 3.6rem); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { font-size: 1.15rem; margin: 0; max-width: 38rem; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.6rem; margin: 0; text-wrap: balance; }
+section, header { display: flex; flex-direction: column; gap: 1.25rem; }
+section > p { margin: 0; max-width: 42rem; color: var(--muted); }
+pre, code { font-family: var(--font-mono); font-size: 0.88rem; }
+.term { background: var(--ink); color: var(--paper); border-radius: 4px; padding: 1rem 1.15rem; margin: 0; overflow-x: auto; line-height: 1.7; }
+.term .p { color: var(--muted); user-select: none; }
+.cmd { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.copy { font-family: var(--font-mono); font-size: 0.8rem; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); border-radius: 3px; padding: 0.35rem 0.7rem; cursor: pointer; }
+.copy:hover { border-color: var(--accent); }
+.copy:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.examples { display: grid; gap: 1.25rem; }
+.ex { border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.ex-head { padding: 0.8rem 1rem; border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1rem; align-items: baseline; }
+.ex-head strong { font-weight: 600; }
+.ex-head span { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+.ex-body { display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); border-bottom: 1px solid var(--rule); }
+.row:last-child { border-bottom: 0; }
+.row > div:first-child { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 0.7rem 1rem; }
+.row > div:last-child { min-width: 0; overflow-x: auto; padding: 0.55rem 1rem; }
+.row pre { margin: 0; white-space: pre; }
+.del { color: var(--del); background: var(--del-bg); display: block; padding: 0 0.3rem; }
+.add { color: var(--add); background: var(--add-bg); display: block; padding: 0 0.3rem; }
+.why { font-size: 0.92rem; color: var(--muted); }
+.tablebox { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; min-width: 34rem; }
+th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--panel); }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+ol.steps { margin: 0; padding-left: 1.4rem; display: flex; flex-direction: column; gap: 0.6rem; max-width: 42rem; }
+ul.limits { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.6rem; max-width: 42rem; }
+a { color: var(--accent); text-underline-offset: 2px; }
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; font-size: 0.88rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.4rem; }
+footer p { margin: 0; }
+@media (max-width: 560px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .row > div:first-child { padding-bottom: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="name">gameability</div>
+  <h1><em>17.9%</em> of MBPP problems accept a broken solution.</h1>
+  <p class="lede">gameability breaks each problem's reference solution in one small place, checks that the result gives wrong answers, and asks whether the problem's own tests notice. No model, no API key, minutes on a laptop. Checked against EvalPlus's independent tests, 95% of the flagged MBPP problems and 85% of the flagged HumanEval problems are confirmed wrong on valid inputs.</p>
+  <div class="cmd">
+    <pre class="term" id="install"><span class="p">$ </span>pip install "gameability[hf]"
+<span class="p">$ </span>gameability check mbpp</pre>
+  </div>
+  <div><button class="copy" type="button" id="copy-btn" data-target="install">Copy commands</button></div>
+</header>
+
+<section>
+  <h2>Three problems from MBPP</h2>
+  <p>Each one passes every visible test with the changed line in place. The last row is a test gameability generated from the reference solution that the broken version fails.</p>
+  <div class="examples">
+
+    <article class="ex">
+      <div class="ex-head"><strong>Find the minimum of two numbers</strong><span>MBPP #404</span></div>
+      <div class="ex-body">
+        <div class="row"><div>Visible test</div><div><pre>assert minimum(1,2) == 1</pre></div></div>
+        <div class="row"><div>The change</div><div><pre><span class="del">-        return b</span><span class="add">+        return None</span></pre></div></div>
+        <div class="row"><div>Catches it</div><div><pre>assert minimum(7, 5) == 5</pre></div></div>
+      </div>
+    </article>
+
+    <article class="ex">
+      <div class="ex-head"><strong>Find the pair with the highest product</strong><span>MBPP #415 &middot; 6 of 11 broken versions pass</span></div>
+      <div class="ex-body">
+        <div class="row"><div>Visible test</div><div><pre>assert max_Product([1,2,3,4,7,0,8,4]) == (7,8)</pre></div></div>
+        <div class="row"><div>The change</div><div><pre><span class="del">-    if arr_len &lt; 2:</span><span class="add">+    if arr_len &lt;= 2:</span></pre></div></div>
+        <div class="row"><div>Catches it</div><div><pre>assert max_Product([4, 9]) == (4, 9)</pre></div></div>
+      </div>
+    </article>
+
+    <article class="ex">
+      <div class="ex-head"><strong>Sum the positive numbers in a list</strong><span>MBPP #870</span></div>
+      <div class="ex-body">
+        <div class="row"><div>Visible test</div><div><pre>assert sum_positivenum([2, 4, -6, -9, 11, -12, 14, -5, 17])==48</pre></div></div>
+        <div class="row"><div>The change</div><div><pre><span class="del">-    sum_positivenum = list(filter(lambda nums: nums &gt; 0, nums))</span><span class="add">+    sum_positivenum = list(filter(lambda nums: nums &gt; 1, nums))</span></pre></div></div>
+        <div class="row"><div>Catches it</div><div><pre>assert sum_positivenum([7, 1, -4, -2, 16, -10, 21, 0, 18, -1]) == 63</pre></div></div>
+      </div>
+    </article>
+
+  </div>
+  <p class="why">A model trained to pass these tests is rewarded the same for the broken version as for the right one.</p>
+</section>
+
+<section>
+  <h2>Results</h2>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Benchmark</th><th>Problems that accept a broken solution</th><th>95% interval</th><th>Run time</th></tr></thead>
+      <tbody>
+        <tr><td>MBPP</td><td class="n">17.9% &nbsp;(169 of 942)</td><td class="n">[15.6, 20.5]</td><td class="n">minutes</td></tr>
+        <tr><td>MBPP sanitized</td><td class="n">13.8% &nbsp;(57 of 413)</td><td class="n">[10.8, 17.5]</td><td class="n">minutes</td></tr>
+        <tr><td>HumanEval</td><td class="n">10.3% &nbsp;(16 of 155)</td><td class="n">[6.5, 16.1]</td><td class="n">minutes</td></tr>
+        <tr><td>KodCode (RL training set, 1,000-row sample)</td><td class="n">9.7% &nbsp;(45 of 466)</td><td class="n">[7.3, 12.7]</td><td class="n">minutes</td></tr>
+        <tr><td>HumanEval+ (EvalPlus)</td><td class="n">3.4% &nbsp;(5 of 147)</td><td class="n">[1.5, 7.7]</td><td class="n">minutes</td></tr>
+        <tr><td>MBPP+ (EvalPlus)</td><td class="n">2.0% &nbsp;(7 of 353)</td><td class="n">[1.0, 4.0]</td><td class="n">minutes</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Brackets are 95% intervals. Problems where no fair judgement was possible (the reference fails its own tests, or no usable inputs) are excluded and counted in the report. Defaults: 24 broken versions per problem, 8 fresh inputs, seed 0.</p>
+  <p><strong>Confirmed on valid inputs.</strong> On the problems EvalPlus also covers, every accepted broken solution was re-run on EvalPlus's tests, whose inputs respect each problem's rules: 95.2% of flagged MBPP problems (20 of 21) and 84.6% of flagged HumanEval problems (11 of 13) are confirmed. The two unconfirmed HumanEval problems have visible tests that contradict their own written specification. Version 0.1 confirmed 85.7% and 78.6%; v0.2 keeps fresh inputs inside the domain each problem's own tests use.</p>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li>The reference solution must pass its own visible tests, or the problem is excluded.</li>
+    <li>Fresh inputs are built by varying the arguments in the visible tests. The reference's outputs on them become a hidden answer key.</li>
+    <li>The reference is changed at one site: a comparison flipped, an operator swapped, a constant nudged, a return replaced with <code>return None</code>.</li>
+    <li>A changed version counts as broken only if it gives a different answer from the reference on a fresh input. Versions that behave identically are discarded.</li>
+    <li>A broken version that passes every visible test is reported, with the input that exposes it.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Run it on your own benchmark</h2>
+  <p>One problem per line, with the reference solution and the visible tests:</p>
+  <pre class="term">{"id": "clamp", "reference": "def clamp(x, lo, hi): ...", "tests": ["assert clamp(5, 0, 10) == 5"]}</pre>
+  <pre class="term"><span class="p">$ </span>gameability check my_benchmark.jsonl --fixes fixes.py</pre>
+  <p><code>--fixes</code> writes a suggested test for every weak problem. On 34 MBPP and HumanEval problems its tests wrongly rejected 2.6% of a model's correct solutions (v0.1: 15.3%). They target the broken versions gameability builds rather than any one model's mistakes, so review them before adding them.</p>
+</section>
+
+<section>
+  <h2>What the numbers don't say</h2>
+  <ul class="limits">
+    <li>The attacker is weak. One small edit is the simplest way to be wrong; a model optimised against these tests can find many more.</li>
+    <li>Fresh inputs stay inside each argument's observed domain, but relationships between arguments (a length that must match a list) and rules stated only in a docstring are not modelled. On the problems EvalPlus covers, 5% of flagged MBPP and 15% of flagged HumanEval problems remain unconfirmed.</li>
+    <li>They describe the tests, not any model, and they do not predict where a model will cheat: on a 1.5B coder, false passes were no more common on flagged problems than on others.</li>
+    <li>gameability runs the benchmark's code. Use it on benchmarks you are willing to execute.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>gameability is open source under the MIT license.</p>
+  <p>Made by Empyrean Intelligence, Bangalore, a lab building self-improving AI that can be checked.</p>
+</footer>
+
+</div>
+<script>
+(function () {
+  var btn = document.getElementById("copy-btn");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    var text = 'pip install "gameability[hf]"\ngameability check mbpp';
+    function done(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = "Copy commands"; }, 1800); }
+    try {
+      navigator.clipboard.writeText(text).then(function () { done("Copied"); }, function () { selectIt(); });
+    } catch (e) { selectIt(); }
+    function selectIt() {
+      var el = document.getElementById(btn.getAttribute("data-target"));
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      done("Selected, press Ctrl+C");
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+{"id": "clamp-weak", "reference": "def clamp(x, lo, hi):\n    if x < lo:\n        return lo\n    if x > hi:\n        return hi\n    return x\n", "tests": ["assert clamp(5, 0, 10) == 5", "assert clamp(-3, 0, 10) == 0"]}
+{"id": "clamp-strong", "reference": "def clamp(x, lo, hi):\n    if x < lo:\n        return lo\n    if x > hi:\n        return hi\n    return x\n", "tests": ["assert clamp(5, 0, 10) == 5", "assert clamp(-3, 0, 10) == 0", "assert clamp(0, 0, 10) == 0", "assert clamp(10, 0, 10) == 10", "assert clamp(11, 0, 10) == 10", "assert clamp(-1, 0, 10) == 0"]}
+{"id": "digit-sum", "reference": "def digit_sum(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n //= 10\n    return total\n", "tests": ["assert digit_sum(123) == 6"]}
