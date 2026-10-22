@@ -94,7 +94,7 @@ footer p { margin: 0; }
   <h1><em>17.9%</em> of MBPP problems accept a broken solution.</h1>
   <p class="lede">gameability breaks each problem's reference solution in one small place, checks that the result gives wrong answers, and asks whether the problem's own tests notice. No model, no API key, minutes on a laptop. Checked against EvalPlus's independent tests, 95% of the flagged MBPP problems and 85% of the flagged HumanEval problems are confirmed wrong on valid inputs.</p>
   <div class="cmd">
-    <pre class="term" id="install"><span class="p">$ </span>pip install "gameability[hf]"
+    <pre class="term" id="install"><span class="p">$ </span>pip install &quot;gameability[hf] @ git+https://github.com/Empyrean-Intelligence/gameability&quot;
 <span class="p">$ </span>gameability check mbpp</pre>
   </div>
   <div><button class="copy" type="button" id="copy-btn" data-target="install">Copy commands</button></div>
@@ -195,7 +195,7 @@ footer p { margin: 0; }
   var btn = document.getElementById("copy-btn");
   if (!btn) return;
   btn.addEventListener("click", function () {
-    var text = 'pip install "gameability[hf]"\ngameability check mbpp';
+    var text = 'pip install "gameability[hf] @ git+https://github.com/Empyrean-Intelligence/gameability"\ngameability check mbpp';
     function done(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = "Copy commands"; }, 1800); }
     try {
       navigator.clipboard.writeText(text).then(function () { done("Copied"); }, function () { selectIt(); });
