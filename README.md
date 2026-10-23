@@ -13,7 +13,7 @@ solution, breaks it in one small place, confirms the result really is wrong, and
 asks whether the problem's own tests notice.
 
 ```
-pip install "gameability[hf] @ git+https://github.com/Empyrean-Intelligence/gameability"   # PyPI release coming
+pip install "gameability[hf]"
 gameability check mbpp
 ```
 
