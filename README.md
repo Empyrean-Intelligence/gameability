@@ -28,6 +28,10 @@ was re-run against EvalPlus's independent tests, whose inputs respect each probl
 solution passes the original tests and fails EvalPlus). The two unconfirmed HumanEval problems
 (116 and 129) are ones whose own visible tests contradict their written specification.
 
+**New in v0.3: `gameability probe`.** It asks the same question of an RL environment's reward: does
+it pay a policy that does no work? See [Probe an RL environment's reward](#probe-an-rl-environments-reward).
+By default it makes no model calls.
+
 **What changed in v0.2.** v0.1 built fresh inputs by changing values freely, which sometimes asked
 a problem about inputs it never promised to handle (an unsorted list for binary search, random
 letters for a parenthesis parser). v0.2 learns each argument's domain from the problem's own
@@ -93,6 +97,40 @@ For each problem the benchmark supplies (reference solution, visible tests):
 Benchmark code runs in a child process with a step budget, so a runaway mutant is stopped at
 the same point on any machine; a wall-clock limit is only a backstop. Mutants that never
 finish are reported as truncated, never counted as rejected.
+
+## Probe an RL environment's reward
+
+`gameability probe` asks a different question of an RL environment: does its reward pay a policy that
+does no work? It answers every item with an empty string, a refusal, the prompt echoed back, a wrong
+answer in the expected format, and filler text, and scores each through the environment's own rubric.
+
+```
+pip install gameability verifiers
+pip install ./my_env          # your verifiers environment
+gameability probe my_env
+```
+
+On a multiple-choice test environment with an exact-match reward (verifiers 0.1.11):
+
+```
+mmlu: 20 items, eval split, scored by the environment's own rubric
+  correct answers             1.000   (answer format: plain)
+  empty answer                0.000
+  refusal                     0.000
+  prompt echoed back          0.000
+  wrong answer, right format  0.000
+  filler text                 0.000
+  (most common answer every time earns 25% of the correct-answer reward; reported, not counted)
+VERDICT: PASS -- no null probe earns 50% of the correct-answer reward (finds only gaming that needs no capability)
+```
+
+An environment that pays for an empty answer instead prints `<-- pays for no work` on that line and
+`VERDICT: GAMEABLE`.
+
+The exit code is 1 when the environment is gameable, so it can gate CI. No model is called by default:
+OpenAI clients are pointed at a dead local address, so a reward that needs an LLM judge is reported
+UNREACHABLE instead of spending your credits (`--allow-model-calls` to permit it). A PASS means no
+*no-capability* gaming was found; it is not a proof that the reward is sound.
 
 ## Your own benchmark
 

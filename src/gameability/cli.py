@@ -1,8 +1,9 @@
-"""Command line: gameability check <benchmark>
+"""Command line: gameability check <benchmark> | gameability probe <rl-environment>
 
     gameability check mbpp
     gameability check humaneval --limit 50
     gameability check my_benchmark.jsonl --fixes fixes.py --json report.json
+    gameability probe my_env --n 20
 """
 import argparse
 import ast
@@ -109,7 +110,8 @@ def check(a):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="gameability",
-                                 description="Find the problems in a code benchmark that accept broken solutions.")
+                                 description="Find the problems in a code benchmark that accept broken solutions, "
+                                             "and the RL environments whose reward pays for no work.")
     ap.add_argument("--version", action="version", version="gameability " + __version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("check", help="audit a benchmark")
@@ -126,9 +128,29 @@ def main(argv=None):
     c.add_argument("--show", type=int, default=5, help="print this many weak problems with the changed line")
     c.add_argument("--fixes", help="write suggested asserts to this file")
     c.add_argument("--json", help="write the full report to this file")
+    p = sub.add_parser("probe", help="check whether an RL environment's reward pays for no work")
+    p.add_argument("env", help="id of a verifiers environment installed in this Python")
+    p.add_argument("--n", type=int, default=20, help="number of items to score (default 20)")
+    p.add_argument("--args", default="{}", help="JSON keyword arguments for load_environment")
+    p.add_argument("--allow-model-calls", action="store_true",
+                   help="let rewards that use an LLM judge call your OpenAI endpoint (costs money)")
+    p.add_argument("--json", help="write the full result to this file")
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check(a)
+    if a.cmd == "probe":
+        return probe_cmd(a)
+
+
+def probe_cmd(a):
+    from .probe import probe, report as probe_report
+    res = probe(a.env, n_items=a.n, load_args=json.loads(a.args), allow_model_calls=a.allow_model_calls)
+    probe_report(res)
+    if a.json:
+        with open(a.json, "w", encoding="utf-8") as f:
+            json.dump(dict(res, version=__version__), f, indent=1, default=str)
+        print("wrote %s" % a.json)
+    return 1 if res.get("gameable") else 0
 
 
 if __name__ == "__main__":
