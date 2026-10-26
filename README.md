@@ -1,5 +1,7 @@
 # gameability
 
+[![PyPI](https://img.shields.io/pypi/v/gameability)](https://pypi.org/project/gameability/) [![Python](https://img.shields.io/pypi/pyversions/gameability)](https://pypi.org/project/gameability/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Empyrean Intelligence](https://img.shields.io/badge/by-Empyrean%20Intelligence-111)](https://empyreanintelligence.com)
+
 **Find the problems in a code benchmark that accept broken solutions.**
 
 When a model learns from tests, the tests are its reward. A self-improving system trained on tests that
