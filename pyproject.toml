@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gameability"
-version = "0.3.0"
+version = "0.3.1"
 description = "Find the problems in a code benchmark that accept broken solutions, and RL environments whose reward pays for no work."
 readme = "README.md"
 license = "MIT"

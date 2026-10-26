@@ -16,4 +16,4 @@ from .engine import Problem, audit, census, report, summarise
 from .harden import witnesses
 
 __all__ = ["Problem", "audit", "census", "summarise", "report", "witnesses"]
-__version__ = "0.3.0"
+__version__ = "0.3.1"
